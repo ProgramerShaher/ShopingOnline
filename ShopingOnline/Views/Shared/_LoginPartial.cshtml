@@ -1,0 +1,100 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<div class="navbar-container">
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="#">Logo</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
+                            <span class="greeting">Hello @User.Identity?.Name!</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                            <button type="submit" class="nav-link btn btn-link text-dark logout-btn">Logout</button>
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white register-btn" asp-area="Identity" asp-page="/Account/Register">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white login-btn" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </nav>
+</div>
+
+                <style>
+    /* Navbar Styling */
+    .navbar-container {
+        margin-bottom: 20px; /* Adding space below the navbar */
+    }
+
+    .navbar-nav {
+        display: flex;
+        align-items: center;
+    }
+
+    .greeting {
+        font-size: 16px;
+        font-weight: 600;
+        color: #D10024;
+        padding-right: 10px;
+    }
+
+    /* Register and Login Buttons */
+    .nav-link.text-white {
+        font-size: 14px;
+        font-weight: 500;
+        padding: 8px 15px;
+        text-transform: uppercase;
+        border-radius: 20px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+        .nav-link.text-white:hover {
+            background-color: #D10024;
+            color: #fff;
+        }
+
+    /* Logout Button */
+    .logout-btn {
+        font-size: 14px;
+        font-weight: 500;
+        color: #D10024;
+        text-decoration: none;
+        background: none;
+        border: none;
+        padding: 8px 15px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+        .logout-btn:hover {
+            background-color: #D10024;
+            color: #fff;
+        }
+
+    /* For smaller screens */
+    @@media (max-width: 991px) {
+        .navbar-nav
+
+    {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    }
+</style>

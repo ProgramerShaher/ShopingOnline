@@ -1,0 +1,33 @@
+﻿@model Order
+
+<div class="container py-5 text-center">
+    <h2 class="text-success fw-bold mb-4">✅ تم إتمام الطلب بنجاح!</h2>
+
+    <!-- عرض رقم الطلب -->
+    <p class="fs-5 mb-4">رقم الطلب الخاص بك هو: <strong class="text-primary">@Model.Id</strong></p>
+
+    <!-- عرض إجمالي الطلب -->
+    <p class="fs-4 mb-5">الإجمالي: <strong class="text-danger">@Model.TotalAmount</strong> ريال</p>
+
+    <!-- تفاصيل الطلب -->
+    <h4 class="text-primary mb-4">تفاصيل الطلب:</h4>
+    <ul class="list-group mb-4">
+        @foreach (var detail in Model.OrderDetails)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>@detail.Product.Name</strong><br />
+                    <small class="text-muted">الكمية: @detail.Quantity</small>
+                </div>
+                <span class="badge bg-info">@detail.Quantity × @detail.Price ريال</span>
+            </li>
+        }
+    </ul>
+
+    <!-- زر العودة للتسوق -->
+    <a href="/Products/Index" class="btn btn-primary btn-lg px-5 py-3 mt-4 rounded-pill shadow-sm">العودة للتسوق</a>
+    <p>رقم الطلب هو: @Model.Id</p>
+
+    <a href="@Url.Action("Invoice", "Cart", new { orderId = Model.Id })" class="btn btn-secondary mt-3">عرض الفاتورة</a>
+
+</div>

@@ -1,0 +1,258 @@
+﻿<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>تفاصيل المنتج</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --accent-color: #ff6b6b;
+            --text-color: #333;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f5f7fa;
+        }
+
+        .product-img-container {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-info-card {
+            border-radius: var(--border-radius);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid #dee2e6;
+        }
+
+            .nav-tabs .nav-link {
+                border: none;
+                color: #6c757d;
+                font-weight: 600;
+                padding: 12px 20px;
+            }
+
+                .nav-tabs .nav-link.active {
+                    color: var(--primary-color);
+                    border-bottom: 3px solid var(--primary-color);
+                }
+
+        .tab-content {
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+
+        .tab-pane {
+            padding: 20px;
+            display: none;
+        }
+
+            .tab-pane.active {
+                display: block;
+            }
+
+        .comment-card {
+            border-left: 3px solid var(--primary-color);
+            margin-bottom: 15px;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    @model ProductCommentsViewModel
+
+    <div class="container py-5">
+        <!-- رأس المنتج -->
+        <div class="row mb-5">
+            <div class="col-md-5">
+                <div class="product-img-container p-3 bg-white">
+                    <img src="~/images/@Model.Product.Image" alt="@Model.Product.Name" class="img-fluid">
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <div class="product-info-card p-4 bg-white">
+                    <h2 class="mb-3">@Model.Product.Name</h2>
+                    <div class="mb-3">
+                        @{
+                            int stars = (int)(Model.Comments.Any() ? Model.Comments.Average(c => c.Stars) : 0);
+                            for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="fa @(i <= stars ? "fa-star text-warning" : "fa-star-o text-muted")"></i>
+                            }
+                            <span class="ms-2">(@Model.Comments.Count تقييم)</span>
+                        }
+                    </div>
+                    <h4 class="text-danger mb-3">@Model.Product.Price <del class="text-muted fs-6">$990.00</del></h4>
+                    <span class="badge bg-success mb-3">متوفر</span>
+                    <p class="mb-4">@Model.Product.Description</p>
+                    <button class="btn btn-primary w-100 mb-3">
+                        <i class="fa fa-shopping-cart"></i> أضافة إلى السلة
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- تبويبات تفاصيل المنتج -->
+        <div class="row">
+            <div class="col-12">
+                <ul class="nav nav-tabs" id="productTabs">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-tab="desc">
+                            <i class="fa fa-file-text me-2"></i> الوصف
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-tab="details">
+                            <i class="fa fa-info-circle me-2"></i> التفاصيل
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-tab="reviews">
+                            <i class="fa fa-star me-2"></i> التقييمات (@Model.Comments.Count)
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content bg-white">
+                    <!-- تبويب الوصف -->
+                    <div id="desc" class="tab-pane active">
+                        <h4 class="mb-4">وصف المنتج</h4>
+                        <p>@Model.Product.Description</p>
+                    </div>
+
+                    <!-- تبويب التفاصيل -->
+                    <div id="details" class="tab-pane">
+                        <h4 class="mb-4">تفاصيل المنتج</h4>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th width="30%">الاسم</th>
+                                <td>@Model.Product.Name</td>
+                            </tr>
+                            <tr>
+                                <th>السعر</th>
+                                <td>@Model.Product.Price</td>
+                            </tr>
+                            <tr>
+                                <th>الكمية</th>
+                                <td>@Model.Product.Quantity</td>
+                            </tr>
+                            <tr>
+                                <th>التصنيف</th>
+                                <td>@Model.Product.Category?.Name</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- تبويب التقييمات -->
+                    <div id="reviews" class="tab-pane">
+                        <h4 class="mb-4">تقييمات العملاء</h4>
+
+                        @if (Model.Comments.Any())
+                        {
+                            foreach (var comment in Model.Comments)
+                            {
+                                <div class="comment-card">
+                                    <h5>@comment.User?.FullName</h5>
+                                    <div>
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="fa @(i <= comment.Stars ? "fa-star text-warning" : "fa-star-o text-muted")"></i>
+                                        }
+                                    </div>
+                                    <p class="mt-2">@comment.CommentText</p>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                لا توجد تقييمات لهذا المنتج بعد. كن أول من يقيم!
+                            </div>
+                        }
+
+                        <!-- نموذج التقييم -->
+                        <div class="mt-4 p-4 border rounded">
+                            <h5>أضف تقييمك</h5>
+                            <form asp-action="SubmitComment" method="post">
+                                <div class="mb-3">
+                                    <input asp-for="User.FullName" class="form-control" placeholder="اسمك">
+                                </div>
+                                <div class="mb-3">
+                                    <input asp-for="User.Email" class="form-control" placeholder="بريدك الإلكتروني">
+                                </div>
+                                <div class="mb-3">
+                                    <textarea asp-for="NewCommentText" class="form-control" rows="4" placeholder="تعليقك"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label>التقييم:</label>
+                                    <div class="rating">
+                                        @for (int i = 5; i >= 1; i--)
+                                        {
+                                            <input type="radio" asp-for="NewStars" value="@i" id="star@i">
+                                            <label for="star@i" class="fa fa-star"></label>
+                                        }
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">إرسال</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // تنظيم التبويبات
+        document.querySelectorAll('[data-tab]').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // إخفاء جميع المحتويات
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.remove('active');
+                });
+
+                // إزالة التنشيط من جميع التبويبات
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+
+                // تنشيط التبويب الحالي
+                this.classList.add('active');
+
+                // إظهار المحتوى المرتبط
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // نظام النجوم
+        document.querySelectorAll('.rating input').forEach(star => {
+            star.addEventListener('change', function() {
+                const stars = this.value;
+                const labels = this.parentElement.querySelectorAll('label');
+
+                labels.forEach((label, index) => {
+                    if (index >= (5 - stars)) {
+                        label.classList.add('checked');
+                    } else {
+                        label.classList.remove('checked');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

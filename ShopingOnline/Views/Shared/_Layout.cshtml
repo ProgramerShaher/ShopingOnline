@@ -1,0 +1,254 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+	<title>Shopping-Electroic</title>
+
+	<!-- Google font -->
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+
+	<!-- Bootstrap -->
+	<link rel="stylesheet" href="~/css/bootstrap.min.css" />
+
+	<!-- Slick -->
+	<link type="text/css" rel="stylesheet" href="~/css/slick.css" />
+	<link type="text/css" rel="stylesheet" href="~/css/slick-theme.css" />
+
+	<!-- nouislider -->
+	<link type="text/css" rel="stylesheet" href="~/css/nouislider.min.css" />
+
+	<!-- Font Awesome Icon -->
+	<link rel="stylesheet" href="~/css/font-awesome.min.css">
+
+	<!-- Custom stlylesheet -->
+	<link type="text/css" rel="stylesheet" href="~/css/style.css" />
+
+	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src="~/js/bootstrap.bundle.min.js"></script>
+	<![endif]-->
+
+</head>
+<body>
+	<!-- HEADER -->
+	<header>
+		<!-- TOP HEADER -->
+		<div id="top-header">
+			<div class="container">
+				<ul class="header-links pull-left">
+					<li><a href=""><i class="fas fa-phone"></i> +967 779-007-753</a></li>
+					<li>
+						<a href="https://shahrkhaldalyryalyry@gmail.com"><i class="fas fa-envelope-o"></i> Shaher-Khailed@email.com</a>
+					</li>
+					<li><a href="https://maps.app.goo.gl/movAYBdxxFicmGWD6"><i class="fas fa-map-marker"></i>Sanaa-Alhymah-Internal</a></li>
+				</ul>
+				<ul class="header-links pull-right">
+					
+					<partial name="_LoginPartial" />
+					
+				</ul>
+			</div>
+		</div>
+		<!-- /TOP HEADER -->
+		<!-- MAIN HEADER -->
+		<div id="header">
+			<!-- container -->
+			<div class="container">
+				<!-- row -->
+				<div class="row">
+					<!-- LOGO -->
+					<div class="col-md-3">
+						<div class="header-logo">
+							<a href="#" class="logo">
+								<img src="~/img/logo.png" alt="">
+							</a>
+						</div>
+					</div>
+					<!-- /LOGO -->
+					<!-- SEARCH BAR -->
+					<div class="col-md-6">
+						<div class="header-search">
+							<form>
+								<select class="input-select">
+									<option value="0">All ألاصناف</option>
+									<option value="1">Category 01</option>
+									<option value="1">Category 02</option>
+								</select>
+								<input class="input" placeholder="Search here">
+								<button class="search-btn">Search</button>
+							</form>
+						</div>
+					</div>
+					<!-- /SEARCH BAR -->
+					
+				</div>
+				<!-- row -->
+			</div>
+			<!-- container -->
+		</div>
+		<!-- /MAIN HEADER -->
+	</header>
+	
+	<!-- /HEADER -->
+	<!-- NAVIGATION -->
+	<nav id="navigation" class="shadow-sm">
+		<!-- container -->
+		<div class="container">
+			<!-- responsive-nav -->
+			<div id="responsive-nav">
+				<!-- NAV -->
+				<ul class="main-nav nav justify-content-center">
+					<li class="nav-item active"><a class="nav-link" href="#">الصفحة الرئيسية</a></li>
+					<li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="HotalProduct">منتجات ساخنة</a></li>
+					<li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Categories">الأصناف</a></li>
+					<li class="nav-item"><a class="nav-link" href="#">حول المتجر</a></li>
+					<li class="nav-item"><a class="nav-link" href="#">أعضاء الفريق</a></li>
+					<li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Contact">تواصل معنا</a></li>
+					<li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Messages">تواصل معنا</a></li>
+
+
+				</ul>
+				<!-- /NAV -->
+			</div>
+			<!-- /responsive-nav -->
+		</div>
+		<!-- /container -->
+	</nav>
+
+	<!-- /NAVIGATION -->
+	@RenderBody()
+
+	<!-- NEWSLETTER -->
+	<div id="newsletter" class="section">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="newsletter">
+						<p>اشترك في <strong>النشرة الاخبارية</strong></p>
+						<form>
+							<input class="input" type="email" placeholder="Enter Your Email">
+							<button class="newsletter-btn"><i class="fas fa-envelope"></i> أشترك</button>
+						</form>
+						<ul class="newsletter-follow">
+							<li>
+								<a href="#"><i class="fas fa-facebook"></i></a>
+							</li>
+							<li>
+								<a href="#"><i class="fas fa-twitter"></i></a>
+							</li>
+							<li>
+								<a href="#"><i class="fas fa-instagram"></i></a>
+							</li>
+							<li>
+								<a href="#"><i class="fas fa-pinterest"></i></a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /NEWSLETTER -->
+	<!-- FOOTER -->
+	<footer id="footer">
+		<!-- top footer -->
+		<div class="section">
+			<!-- container -->
+			<div class="container">
+				<!-- row -->
+				<div class="row">
+					<div class="col-md-3 col-xs-6">
+						<div class="footer">
+							<h3 class="footer-title">عن المتجر</h3>
+							<p>
+								🚚 توصيل سريع خلال 1-3 أيام عمل داخل المدينة.
+								📦 توصيل مجاني للطلبات فوق 200 ريال.
+								🔍 تتبع الطلب عبر الرسائل النصية والبريد الإلكتروني.
+							</p>
+							<ul class="footer-links">
+								<li><a href="#"><i class="fas fa-map-marker"></i> محافظة صنعاء - شارع صخر</a></li>
+								<li><a href="#"><i class="fas fa-phone"></i>+967 779-007-753</a></li>
+								<li><a href="#"><i class="fas fa-envelope-o"></i>Shaher-Khailed@email.com</a></li>
+							</ul>
+						</div>
+					</div>
+
+					<div class="col-md-3 col-xs-6">
+						<div class="footer">
+							<h3 class="footer-title">ألاصناف</h3>
+							<ul class="footer-links">
+								<li><a href="#">منتجات ساخنة</a></li>
+								<li><a href="#">لابتوبات</a></li>
+								<li><a href="#">الهواتف الذكية</a></li>
+								<li><a href="#">كاميرات</a></li>
+								<li><a href="#">أكسسوارات</a></li>
+							</ul>
+						</div>
+					</div>
+
+					<div class="col-md-3 col-xs-6">
+						<div class="footer">
+							<h3 class="footer-title">معلومات</h3>
+							<ul class="footer-links">
+								<li><a href="#">عن المتجر</a></li>
+								<li><a href="#">تواصل معنا</a></li>
+								<li><a href="#">السياسة والخصوصية </a></li>
+							</ul>
+						</div>
+					</div>
+
+					<div class="col-md-3 col-xs-6">
+						<div class="footer">
+							<h3 class="footer-title">خدمة</h3>
+							<ul class="footer-links">
+								<li><a href="#">حسابي</a></li>
+								<li><a href="">انظر عربتي</a></li>
+								<li><a href="">قائمة الرغبات</a></li>
+								<li><a href="#">تتبع طلباتك</a></li>
+								<li><a href="#">مساعدة</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- bottom footer -->
+		<div id="bottom-footer" class="section">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-12 text-center">
+						<ul class="footer-payments">
+							<li><a href="#"><i class="fas fa-cc-visa"></i></a></li>
+							<li><a href="#"><i class="fas fa-credit-card"></i></a></li>
+							<li><a href="#"><i class="fas fa-cc-paypal"></i></a></li>
+							<li><a href="#"><i class="fas fa-cc-mastercard"></i></a></li>
+							<li><a href="#"><i class="fas fa-cc-discover"></i></a></li>
+							<li><a href="#"><i class="fas fa-cc-amex"></i></a></li>
+						</ul>
+						<span class="copyright">
+							Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fas fa-heart-o" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</footer>
+	<!-- /FOOTER -->
+	<!-- jQuery Plugins -->
+	<script src="~/js/jquery.min.js"></script>
+	<script src="~/js/bootstrap.min.js"></script>
+	<script src="~/js/slick.min.js"></script>
+	<script src="~/js/nouislider.min.js"></script>
+	<script src="~/js/jquery.zoom.min.js"></script>
+	<script src="~/js/main.js"></script>
+	<script src="~/js/bootstrap.bundle.min.js"></script>
+	@RenderSection("Scripts", required: false)
+
+</body>
+</html>

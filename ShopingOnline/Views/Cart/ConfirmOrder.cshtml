@@ -1,0 +1,42 @@
+﻿@model Order
+
+@{
+    ViewData["Title"] = "إتمام الطلب";
+}
+
+<div class="container py-5">
+    <h2 class="text-center mb-5 fw-bold text-primary">📝 إتمام الطلب</h2>
+
+    <form asp-action="ConfirmOrder" method="post" class="row g-4">
+
+        <!-- بيانات المستخدم -->
+        <div class="col-md-6">
+            <label class="form-label">الاسم الكامل</label>
+            <input asp-for="@Model.User.FullName" class="form-control" required />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">البريد الإلكتروني</label>
+            <input asp-for="@Model.User.Email" class="form-control" required />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">رقم الهاتف</label>
+            <input asp-for="@Model.User.PhoneNumber" class="form-control" required />
+        </div>
+
+       
+
+        <!-- ملخص الطلب -->
+        <div class="col-12 mt-4">
+            <h4 class="text-primary fw-bold">💰 ملخص الطلب</h4>
+            <p>سيتم احتساب الإجمالي تلقائيًا من السلة عند التأكيد.</p>
+        </div>
+
+        <!-- زر الإتمام -->
+        <div class="col-12 text-center">
+            <button type="submit" class="btn btn-success btn-lg px-5 rounded-pill">تأكيد الطلب</button>
+        </div>
+    </form>
+</div>
+

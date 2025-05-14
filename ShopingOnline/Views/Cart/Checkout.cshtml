@@ -1,0 +1,512 @@
+﻿@using ShopingOnline.ViewModels
+@model CheckoutViewModel
+
+<!-- إضافة تأثير التحميل -->
+<div id="loading-overlay" style="display:none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">جاري التحميل...</span>
+    </div>
+</div>
+
+<div class="checkout-container">
+    <!-- شريط التقدم -->
+    <div class="progress-steps">
+        <div class="step completed">
+            <span class="step-number">1</span>
+            <span class="step-title">السلة</span>
+        </div>
+        <div class="step completed">
+            <span class="step-number">2</span>
+            <span class="step-title">المعلومات</span>
+        </div>
+        <div class="step active">
+            <span class="step-number">3</span>
+            <span class="step-title">الدفع</span>
+        </div>
+        <div class="step">
+            <span class="step-number">4</span>
+            <span class="step-title">التأكيد</span>
+        </div>
+    </div>
+
+    <div class="checkout-header">
+        <h1 class="checkout-title">إتمام عملية الشراء</h1>
+        <p class="checkout-subtitle">راجع معلوماتك قبل تأكيد الطلب</p>
+    </div>
+
+    <div class="checkout-grid">
+        <!-- قسم معلومات الشحن -->
+        <div class="checkout-section shipping-info">
+            <div class="section-header">
+                <i class="fas fa-truck"></i>
+                <h3>معلومات الشحن</h3>
+                <button class="edit-btn" onclick="editShippingInfo()">تعديل</button>
+            </div>
+            <div class="section-content">
+                <div class="info-row">
+                    <span class="info-label">الاسم الكامل:</span>
+                    <span class="info-value">@Model.FullName</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">رقم الهاتف:</span>
+                    <span class="info-value">@Model.PhoneNumber</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">البريد الإلكتروني:</span>
+                    <span class="info-value">@Model.Email</span>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- قسم طريقة الدفع -->
+        <div class="checkout-section payment-method">
+            <div class="section-header">
+                <i class="fas fa-credit-card"></i>
+                <h3>طريقة الدفع</h3>
+            </div>
+            <div class="section-content">
+                <div class="payment-options">
+                    <label class="payment-option selected">
+                        <input type="radio" name="payment" checked>
+                        <i class="fab fa-cc-mada"></i>
+                        <span>بطاقة مدى</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="payment">
+                        <i class="fab fa-cc-apple-pay"></i>
+                        <span>Apple Pay</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="payment">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>الدفع عند الاستلام</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ملخص الطلب -->
+        <div class="checkout-section order-summary">
+            <div class="section-header">
+                <i class="fas fa-receipt"></i>
+                <h3>ملخص الطلب</h3>
+            </div>
+            <div class="section-content">
+                <div class="order-items">
+                    @foreach (var item in Model.CartItems)
+                    {
+                        <div class="order-item">
+                            <img src="~/images/@item.Product.Image" alt="@item.Product.Name" class="product-image">
+                            <div class="product-details">
+                                <h4>@item.Product.Name</h4>
+                                <p>الكمية: @item.Quantity</p>
+                            </div>
+                            <div class="product-price">
+                                @(item.Product.Price * item.Quantity) ر.س
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="order-totals">
+                    <div class="total-row">
+                        <span>المجموع الفرعي:</span>
+                        <span>@Model.SubTotal ر.س</span>
+                    </div>
+                    <div class="total-row">
+                        <span>تكلفة الشحن:</span>
+                        <span>@Model.Shipping ر.س</span>
+                    </div>
+                    <div class="total-row discount">
+                        <span>الخصم:</span>
+                        <span>@(Model.SubTotal * Convert.ToDecimal(0.10)) ر.س</span>
+                    </div>
+                    <div class="total-row grand-total">
+                        <span>الإجمالي:</span>
+                        <span>@Model.Total </span>
+                    </div>
+                </div>
+
+                <div class="secure-checkout">
+                    <i class="fas fa-lock"></i>
+                    <span>عملية دفع آمنة ومشفرة</span>
+                </div>
+                <div>
+                    <a asp-action="ConfirmOrder" class="btn btn-primary">تأكيد الطلب</a>
+                </div>
+
+
+                <div class="return-policy">
+                    <p>بالضغط على تأكيد الطلب، فإنك توافق على <a href="#">شروط وأحكام</a> المتجر</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+/* التنسيقات العامة */
+:root {
+    --primary-color: #4a6bff;
+    --secondary-color: #f8f9fa;
+    --accent-color: #ff6b6b;
+    --text-color: #333;
+    --light-text: #6c757d;
+    --border-color: #e0e0e0;
+    --success-color: #28a745;
+}
+
+body {
+    font-family: 'Tajawal', sans-serif;
+    background-color: #f5f7fa;
+    color: var(--text-color);
+}
+
+.checkout-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* شريط التقدم */
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--border-color);
+    z-index: 1;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--border-color);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.step-title {
+    font-size: 0.9rem;
+    color: var(--light-text);
+}
+
+.step.completed .step-number {
+    background-color: var(--success-color);
+}
+
+.step.active .step-number {
+    background-color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.step.completed .step-title,
+.step.active .step-title {
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+/* عنوان الصفحة */
+.checkout-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.checkout-title {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.checkout-subtitle {
+    color: var(--light-text);
+    font-size: 1.1rem;
+}
+
+/* شبكة المحتوى */
+.checkout-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@@media (min-width: 992px) {
+    .checkout-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .order-summary {
+        grid-column: span 2;
+    }
+}
+
+@@media (min-width: 1200px) {
+    .checkout-grid {
+        grid-template-columns: 1.5fr 1fr;
+    }
+
+    .order-summary {
+        grid-column: span 1;
+    }
+}
+
+/* أقسام الصفحة */
+.checkout-section {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.section-header {
+    padding: 1.2rem 1.5rem;
+    background-color: var(--secondary-color);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    flex-grow: 1;
+}
+
+.section-header i {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.edit-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0.3rem 0.6rem;
+    border-radius: 5px;
+}
+
+.edit-btn:hover {
+    background-color: rgba(74, 107, 255, 0.1);
+}
+
+.section-content {
+    padding: 1.5rem;
+}
+
+/* معلومات الشحن */
+.info-row {
+    display: flex;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.info-label {
+    font-weight: bold;
+    width: 120px;
+    color: var(--light-text);
+}
+
+.info-value {
+    flex-grow: 1;
+}
+
+/* طرق الدفع */
+.payment-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.payment-option {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.payment-option:hover {
+    border-color: var(--primary-color);
+}
+
+.payment-option.selected {
+    border-color: var(--primary-color);
+    background-color: rgba(74, 107, 255, 0.05);
+}
+
+.payment-option i {
+    font-size: 2rem;
+    color: var(--primary-color);
+}
+
+.payment-option input {
+    display: none;
+}
+
+/* ملخص الطلب */
+.order-items {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
+}
+
+.order-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.product-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin-left: 1rem;
+}
+
+.product-details {
+    flex-grow: 1;
+}
+
+.product-details h4 {
+    margin: 0 0 0.3rem 0;
+    font-size: 1rem;
+}
+
+.product-details p {
+    margin: 0;
+    color: var(--light-text);
+    font-size: 0.9rem;
+}
+
+.product-price {
+    font-weight: bold;
+}
+
+.order-totals {
+    margin: 1.5rem 0;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+}
+
+.discount {
+    color: var(--accent-color);
+}
+
+.grand-total {
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: 0.5rem;
+}
+
+/* زر التأكيد */
+.confirm-order-btn {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.confirm-order-btn:hover {
+    background-color: #3a5bef;
+}
+
+.secure-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--light-text);
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.return-policy {
+    text-align: center;
+    color: var(--light-text);
+    font-size: 0.8rem;
+    margin-top: 1rem;
+}
+
+.return-policy a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+/* تأثير التحميل */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+</style>

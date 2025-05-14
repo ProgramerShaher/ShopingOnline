@@ -1,0 +1,45 @@
+﻿@model Order
+
+<div class="container py-5">
+    <h2 class="fw-bold text-center mb-4">🧾 الفاتورة</h2>
+
+    <div class="mb-4">
+        <p><strong>رقم الفاتورة:</strong> # @Model.Id</p>
+        <p><strong>التاريخ:</strong> @Model.OrderDate.ToString("yyyy-MM-dd")</p>
+        <p><strong>العميل:</strong> @Model.User.FullName</p>
+        <p><strong>الإيميل:</strong> @Model.User.Email</p>
+    </div>
+
+    <table class="table table-bordered">
+        <thead class="table-primary text-center">
+            <tr>
+                <th>المنتج</th>
+                <th>السعر</th>
+                <th>الكمية</th>
+                <th>الإجمالي</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderDetails)
+            {
+                <tr>
+                    <td>@item.Product.Name</td>
+                    <td>@item.Price ﷼</td>
+                    <td>@item.Quantity</td>
+                    <td>@(item.Price * item.Quantity) ﷼</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="text-end fw-bold">
+        <p>💰 الإجمالي النهائي: <span class="text-success">@Model.TotalAmount ﷼</span></p>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="/Products/Index" class="btn btn-outline-primary">العودة للتسوق</a>
+    </div>
+</div>
+<a href="@Url.Action("DownloadInvoice", "Cart", new { orderId = Model.Id })" class="btn btn-danger mt-3">
+    تحميل الفاتورة PDF
+</a>

@@ -1,0 +1,95 @@
+﻿
+@model IEnumerable<ShopingOnline.Models.CartItem>
+
+<div class="cart-section py-5 bg-light">
+    <div class="container">
+     
+
+        <h2 class="text-center mb-5 fw-bold text-primary">🛒 سلة التسوق الخاصة بك</h2>
+      
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-warning text-center">🚫 سلتك فارغة حالياً.</div>
+        }
+        else
+        {
+            <div class="row">
+                <!-- جدول العربة -->
+                <div class="col-lg-8 mb-4">
+                    <div class="table-responsive shadow rounded bg-white p-3">
+                        <table class="table align-middle text-center">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>صورة</th>
+                                    <th>المنتج</th>
+                                    <th>السعر</th>
+                                    <th>الكمية</th>
+                                    <th>الإجمالي</th>
+                                    <th>حذف</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td><img src="~/images/@item.Product.Image" width="70" /></td>
+                                        <td>@item.Product.Name</td>
+                                        <td>@item.Product.Price ريال</td>
+                                        <td>
+                                            <form asp-action="UpdateQuantity" method="post" class="d-flex justify-content-center">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control text-center" style="width: 70px;" />
+                                                <button class="btn btn-sm btn-outline-success ms-2">تحديث</button>
+                                            </form>
+                                        </td>
+                                        <td>@(item.Product.Price * item.Quantity) ريال</td>
+                                        <td>
+                                            <a asp-action="Remove" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ملخص الطلب -->
+                <div class="col-lg-4">
+                    <div class="shadow rounded bg-white p-4 mb-4">
+                        <h4 class="mb-3 fw-bold">💰 ملخص الطلب</h4>
+                        <table class="table">
+                            <tr>
+                                <td><strong>المجموع الفرعي:</strong></td>
+                                <td>@Model.Sum(x => x.Product.Price * x.Quantity) ريال</td>
+                            </tr>
+                            <tr>
+                                <td><strong>الشحن:</strong></td>
+                                <td>20 ريال</td>
+                            </tr>
+                            <tr class="fw-bold text-primary">
+                                <td>الإجمالي:</td>
+                                <td>@(Model.Sum(x => x.Product.Price * x.Quantity) + 20) ريال</td>
+                            </tr>
+                        </table>
+                        <div class="d-grid gap-2">
+                            <a asp-action="Index" class="btn btn-outline-primary">تحديث السلة</a>
+                            <a href="/Checkout" class="btn btn-primary">إتمام الطلب</a>
+                        </div>
+                    </div>
+
+                    <!-- كوبون -->
+                    <div class="shadow rounded bg-white p-4">
+                        <h5 class="fw-bold mb-3">🎟 استخدم كوبون خصم</h5>
+                        <form>
+                            <input type="text" class="form-control mb-2" placeholder="أدخل الكوبون">
+                            <button class="btn btn-success w-100">تطبيق</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
