@@ -1,0 +1,38 @@
+﻿@* تنسيقات Razor لواجهة الفئات بتصميم جذاب باستخدام Bootstrap *@
+@model ShopingOnline.Models.Category
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-gradient bg-primary text-white text-center rounded-top-4">
+            <h2><i class="bi bi-plus-circle"></i> Create New Category</h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label fw-bold"></label>
+                    <input asp-for="Name" class="form-control rounded-3" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label fw-bold"></label>
+                    <input asp-for="Description" class="form-control rounded-3" />
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="File" class="form-label fw-bold"></label>
+                    <input asp-for="File" class="form-control rounded-3" />
+                    <span asp-validation-for="File" class="text-danger"></span>
+                </div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success rounded-pill px-4">Create</button>
+                    <a asp-action="Index" class="btn btn-secondary rounded-pill ms-2">Back to List</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

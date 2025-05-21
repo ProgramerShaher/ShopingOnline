@@ -1,0 +1,12 @@
+﻿<!-- Delete Confirmation -->
+<link rel="stylesheet" href="~/css/style.css" />
+
+<div class="form-container mt-5">
+    <h2 class="page-title text-danger">Delete Product</h2>
+    <p>هل انت متاكد من حذف هذا المنتج <strong>@Model.Name</strong>?</p>
+    <form asp-action="Delete">
+        <input type="hidden"/>
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

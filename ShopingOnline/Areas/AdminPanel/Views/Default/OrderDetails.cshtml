@@ -1,0 +1,27 @@
+﻿@using ShopingOnline.Models
+
+@model OrderDetailsViewModel
+
+<h2>تفاصيل الطلب رقم @Model.OrderId</h2>
+
+<p><strong>المستخدم:</strong> @Model.UserName</p>
+<p><strong>التاريخ:</strong> @Model.OrderDate.ToString("yyyy-MM-dd")</p>
+<p><strong>الحالة:</strong> @Model.Status</p>
+
+<hr />
+<h4>المنتجات:</h4>
+<div class="row">
+    @foreach (var item in Model.Products)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm">
+                <img src="~/images/Products/@item.Image" class="card-img-top" alt="@item.ProductName" style="height: 200px; object-fit: cover;" />
+                <div class="card-body">
+                    <h5 class="card-title">@item.ProductName</h5>
+                    <p class="card-text">@item.Description</p>
+                    <p class="text-muted">السعر: @item.Price.ToString("C")</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>

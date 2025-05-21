@@ -1,5 +1,7 @@
 ﻿
 @model List<ShopingOnline.Models.CartItem>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 
 <div class="cart-section py-5 bg-light">
     <div class="container">
@@ -31,7 +33,7 @@
                                 @foreach (var item in Model)
                                 {
                                     <tr>
-                                        <td><img src="~/images/@item.Product.Image" width="70" /></td>
+                                        <td><img src="~/images/Products/@item.Product.Image" width="70" /></td>
                                         <td>@item.Product.Name</td>
                                         <td>@item.Product.Price ريال</td>
                                         <td>

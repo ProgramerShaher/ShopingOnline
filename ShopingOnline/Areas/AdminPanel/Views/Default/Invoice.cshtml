@@ -1,0 +1,67 @@
+﻿@using ShopingOnline.Models
+@model InvoiceViewModel
+
+<div class="container my-5">
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-primary text-white rounded-top-4 p-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-0">🧾 فاتورة الطلب</h3>
+                <small>رقم الطلب: @Model.OrderId</small>
+            </div>
+            <div>
+                <span class="badge bg-light text-primary fs-6">Store Invoice</span>
+            </div>
+        </div>
+
+        <div class="card-body p-4 bg-white">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="text-secondary fw-semibold mb-2">📍 معلومات العميل</h5>
+                    <p class="mb-1"><strong>الاسم:</strong> @Model.CustomerName</p>
+                    <p class="mb-1"><strong>البريد:</strong> @Model.Email</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h5 class="text-secondary fw-semibold mb-2">📅 تفاصيل الفاتورة</h5>
+                    <p class="mb-1"><strong>تاريخ الطلب:</strong> @Model.OrderDate.ToString("yyyy/MM/dd")</p>
+                    <p class="mb-1"><strong>الحالة:</strong> <span class="badge bg-info text-dark">@Model.Status</span></p>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered text-center align-middle">
+                    <thead class="table-light">
+                        <tr class="text-secondary">
+                            <th>المنتج</th>
+                            <th>التصنيف</th>
+                            <th>الكمية</th>
+                            <th>السعر</th>
+                            <th>الإجمالي</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>@item.ProductName</td>
+                                <td>@item.Category</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.Price.ToString("N2") ريال</td>
+                                <td>@(item.Price * item.Quantity) ريال</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-end mt-4">
+                <h5 class="fw-bold text-dark">💰 الإجمالي: <span class="text-success">@Model.TotalAmount.ToString("N2") ريال</span></h5>
+            </div>
+        </div>
+
+        <div class="card-footer bg-light rounded-bottom-4 text-center py-3">
+            <button onclick="window.print()" class="btn btn-outline-primary px-4">
+                <i class="fas fa-print me-2"></i> طباعة الفاتورة
+            </button>
+        </div>
+    </div>
+</div>

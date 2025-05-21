@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ShopingOnline.Models
 {
@@ -18,9 +19,11 @@ namespace ShopingOnline.Models
 
         public string Image { get; set; }
 
+        public DateTime Date { get; set; } = DateTime.Now;
         public int CategoryId { get; set; }
         public Category Category { get; set; }
-
+        [NotMapped]
+        public IFormFile File { get; set; }
         // علاقات
         public ICollection<OrderDetail> OrderDetails { get; set; }
         public ICollection<Comment> Comments { get; set; }

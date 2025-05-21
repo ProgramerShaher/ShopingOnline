@@ -83,10 +83,23 @@ namespace ShopingOnline
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-            app.MapRazorPages();
+            app.UseEndpoints(endpoints =>
+            {
+                // دعم الـ Areas
+                endpoints.MapControllerRoute(
+                    name: "AdminPanel",
+                    pattern: "{area:exists}/{controller=Default}/{action=Index}/{id?}"
+                );
+
+                // المسار الافتراضي
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}"
+                );
+
+                // دعم صفحات Razor الخاصة بالهوية
+                endpoints.MapRazorPages();
+            });
 
             app.Run();
         }

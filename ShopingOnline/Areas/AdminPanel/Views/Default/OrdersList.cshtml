@@ -1,0 +1,276 @@
+﻿@using ShopingOnline.Models
+@model IEnumerable<ShopingOnline.Models.OrderViewWithProduct>
+
+@functions {
+    string GetStatusClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.جديد => "bg-warning text-dark",
+            OrderStatus.قيد_المعالجة => "bg-info text-white",
+            OrderStatus.مكتمل => "bg-success text-white",
+            OrderStatus.ملغي => "bg-danger text-white",
+            _ => "bg-secondary text-white"
+        };
+    }
+}
+
+<style>
+    /* توزيع الأعمدة ثابت */
+    .table {
+        table-layout: fixed; /* التوزيع المتساوي للأعمدة */
+        width: 100%;
+    }
+
+        /* تكسير النصوص الطويلة داخل الخلايا */
+        .table td, .table th {
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: normal !important; /* مهم ليكسر النص */
+            vertical-align: middle;
+            text-align: center;
+        }
+
+    /* تحديد أعمدة بعرض محدود */
+    .col-products, .col-categories {
+        max-width: 200px; /* اضبط حسب الحاجة */
+        white-space: normal !important;
+        overflow-wrap: break-word;
+    }
+
+    /* باقي التنسيقات كما هي */
+    .table thead th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+        text-align: center;
+    }
+
+    .tr-shadow:hover {
+        background-color: #f1f3f5;
+        transition: background-color 0.3s ease;
+    }
+
+    .table-data-feature .item {
+        color: #495057;
+        background-color: #e9ecef;
+        border-radius: 6px;
+        padding: 6px 10px;
+        margin: 0 3px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+        .table-data-feature .item:hover {
+            background-color: #0d6efd;
+            color: white;
+        }
+</style>
+<div class="row mb-4">
+    <!-- كل الطلبات -->
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 rounded-4 bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6>كل الطلبات</h6>
+                        <h3 class="fw-bold">@ViewBag.TotalOrders</h3>
+                    </div>
+                    <i class="fas fa-list fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- جديد -->
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 rounded-4 bg-secondary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6>جديد</h6>
+                        <h3 class="fw-bold">@ViewBag.NewsOrders</h3>
+                    </div>
+                    <i class="fas fa-star fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- قيد المعالجة -->
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 rounded-4 bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6>قيد المعالجة</h6>
+                        <h3 class="fw-bold">@ViewBag.PendingOrders</h3>
+                    </div>
+                    <i class="fas fa-spinner fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- مكتمل -->
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 rounded-4 bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6>مكتمل</h6>
+                        <h3 class="fw-bold">@ViewBag.CompleteOrder</h3>
+                    </div>
+                    <i class="fas fa-check-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ملغي -->
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 rounded-4 bg-danger text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6>ملغي</h6>
+                        <h3 class="fw-bold">@ViewBag.CanceledOrders</h3>
+                    </div>
+                    <i class="fas fa-times-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<form method="get" asp-action="OrdersList">
+    <input type="date" name="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
+
+    <select name="statuse" class="form-select mt-2">
+        <option value="">الكل</option>
+     
+
+
+
+
+        @foreach (var status in Enum.GetValues(typeof(OrderStatus)))
+        {
+            <option value="@status">@status</option>
+        }
+    </select>
+
+    <button type="submit" class="btn btn-primary mt-2">فلترة</button>
+</form>
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <h3 class="title-5">الطلبات</h3>
+            <div class="table-responsive">
+                <table class="table table-hover table-data2 mb-4">
+                    <thead>
+                        <tr>
+                            <th>العميل</th>
+                            <th class="col-products">المنتجات</th>
+                            <th>تاريخ الطلب</th>
+                            <th>الوصف</th>
+                            <th>الحالة</th>
+                            <th>المجموع</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="tr-shadow">
+                                <td>@item.UserName</td>
+                                <td >
+                                    <ul>
+                                        @foreach(var prod in item.ProductNames){
+                                                    <li style="list-style-type:circle">@prod</li>
+                                                    <span style="color:red">-----------</span>
+                                        }
+                                        ></ul>
+                                </td>
+                                
+                                <td>@item.OrderDate.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <ul>
+                                        @foreach (var desc in item.ProductDescriptions){
+
+                                            <li style="list-style-type:circle">@desc</li>
+                                            <span style="color:red">-----------</span>
+                                        }
+                                    </ul>
+                                </td>
+                                <td>
+                                    <span class="badge @GetStatusClass(item.Status) px-3 py-2" style="font-size: 0.9rem;">
+                                        @item.Status
+                                    </span>
+                                </td>
+                               
+                                <td>@item.TotalAmount.ToString("C")</td>
+                                <td>
+                                    <div class="table-data-feature d-flex justify-content-center">
+                                        <a asp-controller="Default" asp-action="OrderDetails" asp-route-id="@item.OrderId" class="btn btn-sm btn-info">
+                                            <i class="zmdi zmdi-eye"></i> عرض
+                                        </a>
+                                        <a asp-action="YesTheOrder" asp-route-id="@item.OrderId" class="btn btn-sm btn-danger">
+                                            <i class="zmdi zmdi-shopping-cart-add"></i>
+                                        </a>
+                                        <a asp-action="DeleteOrder" asp-route-id="@item.OrderId" class="btn btn-sm btn-danger">
+                                            <i class="zmdi zmdi-delete"></i>
+                                        </a>
+                                        <a asp-controller="Default" asp-action="Invoice" asp-route-id="@item.OrderId" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-file-invoice"></i> فاتورة
+                                        </a>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3 class="title-5">تصنيفات المنتجات</h3>
+            <div class="table-responsive">
+                <table class="table table-borderless table-data3 mb-5" style="table-layout: fixed; width: 100%;">
+                    <thead>
+                        <tr style="color:black">
+                            <th>تاريخ الطلب</th>
+                            <th class="col-categories">الأصناف</th
+                            >
+                            <th>الحالة</th>
+                            <th>المبلغ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.OrderDate.ToString("yyyy-MM-dd")</td>
+                                <td class="col-categories" title="@string.Join(", ", item.ProductCategories)">
+                                    @string.Join(", ", item.ProductCategories)
+                                </td>
+                                <td>
+                                    <span class="badge @GetStatusClass(item.Status) px-3 py-2" style="font-size: 0.9rem;">
+                                        @item.Status
+                                    </span>
+                                </td>
+                                <td>@item.TotalAmount.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

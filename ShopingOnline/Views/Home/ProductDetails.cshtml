@@ -4,8 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>تفاصيل المنتج</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
     <style>
         :root {
             --primary-color: #4e73df;
@@ -30,6 +34,30 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
+        .rating {
+            direction: rtl;
+            unicode-bidi: bidi-override;
+        }
+
+            .rating input {
+                display: none;
+            }
+
+            .rating label {
+                font-size: 2rem;
+                color: #ccc;
+                cursor: pointer;
+                transition: color 0.2s;
+            }
+
+            .rating input:checked ~ label {
+                color: red;
+            }
+
+            .rating label:hover,
+            .rating label:hover ~ label {
+                color: red;
+            }
         .nav-tabs {
             border-bottom: 2px solid #dee2e6;
         }
@@ -77,7 +105,7 @@
         <div class="row mb-5">
             <div class="col-md-5">
                 <div class="product-img-container p-3 bg-white">
-                    <img src="~/images/@Model.Product.Image" alt="@Model.Product.Name" class="img-fluid">
+                    <img src="~/images/Products/@Model.Product.Image" alt="@Model.Product.Name" class="img-fluid">
                 </div>
             </div>
 
@@ -89,7 +117,7 @@
                             int stars = (int)(Model.Comments.Any() ? Model.Comments.Average(c => c.Stars) : 0);
                             for (int i = 1; i <= 5; i++)
                             {
-                                <i class="fa @(i <= stars ? "fa-star text-warning" : "fa-star-o text-muted")"></i>
+                                <i class="fa @(i <= stars ? "fa-star text-danger" : "fa-star-o text-muted")"></i>
                             }
                             <span class="ms-2">(@Model.Comments.Count تقييم)</span>
                         }
@@ -185,26 +213,41 @@
                         <!-- نموذج التقييم -->
                         <div class="mt-4 p-4 border rounded">
                             <h5>أضف تقييمك</h5>
-                            <form asp-action="SubmitComment" method="post">
+                            <form asp-action="AddComment" method="post">
+                                <!-- تأكد أن هذا الحقل يحتوي على قيمة صحيحة -->
                                 <div class="mb-3">
-                                    <input asp-for="User.FullName" class="form-control" placeholder="اسمك">
+                                    <input type="hidden" asp-for="Product.Id" class="form-control" placeholder="رقم المنتج" />
+                                    
                                 </div>
+
                                 <div class="mb-3">
-                                    <input asp-for="User.Email" class="form-control" placeholder="بريدك الإلكتروني">
+                                    <input asp-for="User.FullName" class="form-control" placeholder="اسمك" />
+                                    <span asp-validation-for="User.FullName" class="text-danger"></span>
                                 </div>
+
+                                <div class="mb-3">
+                                    <input asp-for="User.Email" class="form-control" placeholder="بريدك الإلكتروني" />
+                                    <span asp-validation-for="User.Email" class="text-danger"></span>
+                                </div>
+
                                 <div class="mb-3">
                                     <textarea asp-for="NewCommentText" class="form-control" rows="4" placeholder="تعليقك"></textarea>
+                                    <span asp-validation-for="NewCommentText" class="text-danger"></span>
                                 </div>
+
                                 <div class="mb-3">
                                     <label>التقييم:</label>
                                     <div class="rating">
                                         @for (int i = 5; i >= 1; i--)
                                         {
-                                            <input type="radio" asp-for="NewStars" value="@i" id="star@i">
+                                            <input type="radio" asp-for="NewStars" value="@i" id="star@i" />
                                             <label for="star@i" class="fa fa-star"></label>
                                         }
                                     </div>
+                                    <span id="rating-text" class="mt-2 d-block text-danger fw-bold"></span>
+                                    <span asp-validation-for="NewStars" class="text-danger"></span>
                                 </div>
+
                                 <button type="submit" class="btn btn-primary">إرسال</button>
                             </form>
                         </div>
@@ -213,46 +256,8 @@
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // تنظيم التبويبات
-        document.querySelectorAll('[data-tab]').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // إخفاء جميع المحتويات
-                document.querySelectorAll('.tab-pane').forEach(pane => {
-                    pane.classList.remove('active');
-                });
-
-                // إزالة التنشيط من جميع التبويبات
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
-                });
-
-                // تنشيط التبويب الحالي
-                this.classList.add('active');
-
-                // إظهار المحتوى المرتبط
-                const tabId = this.getAttribute('data-tab');
-                document.getElementById(tabId).classList.add('active');
-            });
-        });
-
-        // نظام النجوم
-        document.querySelectorAll('.rating input').forEach(star => {
-            star.addEventListener('change', function() {
-                const stars = this.value;
-                const labels = this.parentElement.querySelectorAll('label');
-
-                labels.forEach((label, index) => {
-                    if (index >= (5 - stars)) {
-                        label.classList.add('checked');
-                    } else {
-                        label.classList.remove('checked');
-                    }
-                });
-            });
-        });
-    </script>
+    
 </body>
 </html>
+
+

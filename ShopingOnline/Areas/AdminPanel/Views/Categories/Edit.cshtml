@@ -1,0 +1,38 @@
+﻿
+@* واجهة Edit *@
+@model ShopingOnline.Models.Category
+@{
+    ViewData["Title"] = "Edit";
+}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-warning text-dark text-center rounded-top-4">
+            <h2><i class="bi bi-pencil-square"></i> Edit Category</h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label fw-bold"></label>
+                    <input asp-for="Name" class="form-control rounded-3" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label fw-bold"></label>
+                    <input asp-for="Description" class="form-control rounded-3" />
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Image" class="form-label fw-bold"></label>
+                    <input asp-for="Image" class="form-control rounded-3" />
+                    <span asp-validation-for="Image" class="text-danger"></span>
+                </div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success rounded-pill px-4">Save</button>
+                    <a asp-action="Index" class="btn btn-secondary rounded-pill ms-2">Back to List</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 

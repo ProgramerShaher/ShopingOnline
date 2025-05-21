@@ -65,18 +65,21 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.Session" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.14.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.13" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+    <PackageReference Include="PayPalCheckoutSdk" Version="1.0.4" />
+    <PackageReference Include="PayPalMerchantSDK" Version="2.16.250" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\js\bootstrap.min.js" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Areas\Adminpanel\" />
+    <Folder Include="Areas\AdminPanel\Data\" />
+    <Folder Include="Areas\AdminPanel\Model\" />
+    <Folder Include="wwwroot\images\Team\" />
+    <Folder Include="wwwroot\images\Users\" />
+    <Folder Include="wwwroot\images\Teammembers\" />
   </ItemGroup>
 
 </Project>

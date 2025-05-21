@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ShopingOnline.Data;
 using ShopingOnline.Models;
 
 namespace ShopingOnline.Controllers
@@ -12,15 +13,16 @@ namespace ShopingOnline.Controllers
     {
 
         private readonly ILogger<HomeController> _logger;
-        private DbShopingOnlineContext db;
-        private readonly UserManager<User> _userManager;
+        private readonly DbShopingOnlineContext _db;
+        private readonly UserManager<User>? _userManager;
 
-        public HomeController(ILogger<HomeController> logger, DbShopingOnlineContext _context, UserManager<User> userManager)
+        public HomeController(ILogger<HomeController> logger, DbShopingOnlineContext db, UserManager<User> userManager)
         {
             _logger = logger;
-            db = _context;
+            _db = db;
+            _userManager = userManager;
         }
-    
+
 
         public IActionResult Index()
         {
@@ -29,11 +31,11 @@ namespace ShopingOnline.Controllers
 
         public IActionResult Product(int id)
         {
-           
+
             TempData["CategoryId"] = id;
-            var result = db.Products.Where(x => x.CategoryId == id).ToList();
+            var result = _db.Products.Where(x => x.CategoryId == id).ToList();
             var userId = HttpContext.Session.GetString("UserId");
-            var cartitemscount = db.CartItems.Where(x => x.UserId == userId).Sum(x => x.Quantity);
+            var cartitemscount = _db.CartItems.Where(x => x.UserId == userId).Sum(x => x.Quantity);
             ViewBag.CartItemsCount = cartitemscount;
 
             return View(result);
@@ -42,7 +44,7 @@ namespace ShopingOnline.Controllers
         public IActionResult Categories()
         {
 
-            return View(db.Categories.ToList());
+            return View(_db.Categories.ToList());
 
         }
         [HttpGet]
@@ -50,45 +52,86 @@ namespace ShopingOnline.Controllers
 
         public IActionResult AddToCart(int id)
         {
-            var product = db.Products.FirstOrDefault(p => p.Id == id);
+
+            var product = _db.Products.FirstOrDefault(p => p.Id == id);
+            var userid = HttpContext.Session.GetString("UserId");
+            var username = HttpContext.Session.GetString("UserName");
 
             if (product == null)
-                return NotFound();
-
-            var username = HttpContext.Session.GetString("UserName");
-            var userId = HttpContext.Session.GetString("UserId");
-
-            var existingCartItem = db.CartItems.FirstOrDefault(ci => ci.ProductId == id && ci.User.UserName==username && ci.UserId == userId);
-
-            if (existingCartItem != null)
             {
-                existingCartItem.Quantity++;
+                return NotFound();
+            }
+
+            var Exectingproduct = _db.CartItems.FirstOrDefault(ci => ci.ProductId == id && ci.UserId == userid && ci.User.UserName == username);
+            if (Exectingproduct != null)
+            {
+                Exectingproduct.Quantity++;
             }
             else
             {
-                var cartItem = new CartItem
+                var cartitem = new CartItem
                 {
-                    UserId = userId,
+                    UserId = userid,
                     ProductId = id,
                     Quantity = 1
                 };
-                db.CartItems.Add(cartItem);
+                _db.CartItems.Add(cartitem);
+
             }
+            int categoryid = Convert.ToInt32(TempData["CategoryId"]);
+            TempData["CategoryId"] = categoryid;
+            _db.SaveChanges();
 
-            db.SaveChanges();
+            return RedirectToAction("Product", new { id = categoryid });
 
-            // «” —Ã⁄ categoryId „‰ TempData
-            int categoryId = Convert.ToInt32(TempData["CategoryId"]);
 
-            // √⁄œ  Œ“Ì‰Â ·√‰ TempData Ìı” Â·ﬂ „—… Ê«Õœ…
-            TempData["CategoryId"] = categoryId;
 
-            // —ÃÊ⁄ ·‰›” ’›Õ… «·„‰ Ã«  Õ”» «·’‰›
-            return RedirectToAction("Product", new { id = categoryId });
+
+
+
+
+
+
+            //var product = _db.Products.FirstOrDefault(p => p.Id == id);
+
+            //if (product == null)
+            //    return NotFound();
+
+            //var username = HttpContext.Session.GetString("UserName");
+            //var userId = HttpContext.Session.GetString("UserId");
+
+
+            //var existingCartItem = _db.CartItems.FirstOrDefault(ci => ci.ProductId == id && ci.User.UserName==username && ci.UserId == userId);
+
+            //if (existingCartItem != null)
+            //{
+            //    existingCartItem.Quantity++;
+            //}
+            //else
+            //{
+            //    var cartItem = new CartItem
+            //    {
+            //        UserId = userId,
+            //        ProductId = id,
+            //        Quantity = 1
+            //    };
+            //    _db.CartItems.Add(cartItem);
+            //}
+
+            //_db.SaveChanges();
+
+            //// «” —Ã⁄ categoryId „‰ TempData
+            //int categoryId = Convert.ToInt32(TempData["CategoryId"]);
+
+            //// √⁄œ  Œ“Ì‰Â ·√‰ TempData Ìı” Â·ﬂ „—… Ê«Õœ…
+            //TempData["CategoryId"] = categoryId;
+
+            //// —ÃÊ⁄ ·‰›” ’›Õ… «·„‰ Ã«  Õ”» «·’‰›
+            //return RedirectToAction("Product" , new {id = categoryId});
         }
         public IActionResult HotalProduct()
         {
-            var result = db.Products.Include(p => p.Category).ToList(); // <<< ÷—Ê—ÌToList();
+            var result = _db.Products.Include(p => p.Category).ToList(); // <<< ÷—Ê—ÌToList();
 
             return View(result);
         }
@@ -104,15 +147,17 @@ namespace ShopingOnline.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Contacts.Add(model);
-                db.SaveChanges();
+                _db.Contacts.Add(model);
+                _db.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
             return View("Contact");
         }
+        // Ì⁄—÷ Ã„Ì⁄ «·—”«∆· «· Ì Ì—”·Â« «·„” Œœ„Ì‰ «Ê «·⁄„·«¡ 
         public IActionResult Messages()
         {
-            var result = db.Contacts.ToList();
+
+            var result = _db.Contacts.ToList();
             if (result == null)
                 return NotFound();
 
@@ -121,7 +166,7 @@ namespace ShopingOnline.Controllers
         // ⁄—÷  ›«’Ì· «·„‰ Ã „⁄ «· ⁄·Ìﬁ« 
         public IActionResult ProductDetails(int id)
         {
-            var product = db.Products
+            var product = _db.Products
                 .Include(p => p.Comments)  // «” Œœ«„ Include · Õ„Ì· «· ⁄·Ìﬁ«  «·„— »ÿ… „»«‘—…
                 .FirstOrDefault(p => p.Id == id);
 
@@ -142,43 +187,43 @@ namespace ShopingOnline.Controllers
         // ≈÷«›…  ⁄·Ìﬁ ÃœÌœ (≈–« ﬂ«‰ «·„” Œœ„ „”Ã· «·œŒÊ·)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment(ProductCommentsViewModel model, int productId)
+        public async Task<IActionResult> AddComment(ProductCommentsViewModel model)
         {
-            if (ModelState.IsValid)
+            if (model.NewCommentText != null)
             {
-                var user = await _userManager.GetUserAsync(User);
+                var username = HttpContext.Session.GetString("UserName");
+                var userid = HttpContext.Session.GetString("UserId");
 
-                if (user == null)
+                if (userid == null)
                 {
                     return RedirectToAction("Login", "Account");
                 }
 
                 var newComment = new Comment
                 {
-                    UserId = user.Id,
-                    ProductId = productId,
+                    UserId = userid,
+                    ProductId = model.Product.Id,  // <--  „ «·«⁄ „«œ ⁄·Ï «·ﬁÌ„… «·„—”·… „‰ «·›Ê—„
                     CommentText = model.NewCommentText,
                     Stars = model.NewStars,
                     CreatedAt = DateTime.Now
                 };
 
-                db.Comments.Add(newComment);
-                await db.SaveChangesAsync();
+                _db.Comments.Add(newComment);
+                await _db.SaveChangesAsync();
 
-                // ≈⁄«œ…  ÊÃÌÂ ≈·Ï ’›Õ… «·„‰ Ã „⁄ «· ⁄·Ìﬁ« 
-                return RedirectToAction("ProductDetails", new { id = productId });  //  ÕœÌÀ «·„⁄«„· ≈·Ï "id"
+                return RedirectToAction("ProductDetails", new { id = model.Product.Id });
             }
 
-            // ≈–« ﬂ«‰  «·»Ì«‰«  €Ì— ’«·Õ…° ≈⁄«œ… ‰›” «·’›Õ…
-            var product = db.Products
+            var product = _db.Products
                 .Include(p => p.Comments)
-                .FirstOrDefault(p => p.Id == productId);
+                .FirstOrDefault(p => p.Id == model.Product.Id);
 
             model.Product = product;
-            model.Comments = product?.Comments.ToList() ?? new List<Comment>();  // «· √ﬂœ „‰ ⁄œ„ «·Õ’Ê· ⁄·Ï ﬁÌ„… ›«—€…
+            model.Comments = product?.Comments.ToList() ?? new List<Comment>();
 
             return View("ProductDetails", model);
         }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

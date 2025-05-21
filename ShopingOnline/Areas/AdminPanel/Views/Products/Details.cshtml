@@ -1,0 +1,23 @@
+﻿<!-- Details -->
+<link rel="stylesheet" href="~/css/style.css" />
+
+<div class="form-container mt-5">
+    <h2 class="page-title">Product Details</h2>
+    <dl class="row">
+        <dt class="col-sm-3">Name</dt>
+        <dd class="col-sm-9">@Model.Name</dd>
+        <dt class="col-sm-3">Description</dt>
+        <dd class="col-sm-9">@Model.Description</dd>
+        <dt class="col-sm-3">Price</dt>
+        <dd class="col-sm-9">@Model.Price</dd>
+        <dt class="col-sm-3">Quantity</dt>
+        <dd class="col-sm-9">@Model.Quantity</dd>
+        <dt class="col-sm-3">Image</dt>
+        <dd class="col-sm-9">@Model.Image</dd>
+        <dt class="col-sm-3">Category</dt>
+        <dd class="col-sm-9">@Model.Category?.Name</dd>
+    </dl>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>
+

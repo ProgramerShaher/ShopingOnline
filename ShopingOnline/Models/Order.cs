@@ -3,6 +3,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ShopingOnline.Models
 {
+    public enum OrderStatus
+    {
+        جديد,          // New (initial status)
+        قيد_المعالجة,  // Being processed
+        مكتمل,         // Delivered or Completed
+        ملغي           // Cancelled
+    }
+
     public class Order
     {
         public int Id { get; set; }
@@ -15,7 +23,7 @@ namespace ShopingOnline.Models
         public DateTime OrderDate { get; set; }
 
         [Required]
-        public string Status { get; set; } = "قيد المعالجة";
+        public OrderStatus OrderStatusNew { get; set; } = OrderStatus.جديد;
 
         public decimal TotalAmount { get; set; }
 

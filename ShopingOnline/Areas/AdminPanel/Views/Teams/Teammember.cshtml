@@ -1,0 +1,82 @@
+﻿@model IEnumerable<ShopingOnline.Models.Team>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+<section class="team-section py-5">
+    <div class="container">
+        <h2 class="text-center mb-5 display-5 fw-bold text-primary">فريقنا الرائع</h2>
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card team-card shadow-sm border-0 h-100 position-relative overflow-hidden">
+                        <div class="team-img-wrapper position-relative">
+                            <img src="~/images/Teammembers/@item.Image" class="card-img-top team-img" alt="@item.Name" />
+                            <div class="team-social d-flex justify-content-center align-items-center">
+                                <a href="#" class="social-icon"><i class="bi bi-twitter-"></i></a>
+                                <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
+                                <a href="#" class="social-icon"><i class="bi bi-instagram"></i></a>
+                                <a href="#" class="social-icon"><i class="bi bi-linkedin"></i></a>
+                            </div>
+                        </div>
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">@item.Name</h5>
+                            <p class="card-text text-muted">@item.Jobs</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<style>
+    .team-img-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .team-img {
+        transition: transform 0.5s ease;
+        height: 450px;
+        object-fit: cover;
+    }
+
+    .team-card:hover .team-img {
+        transform: scale(1.05);
+    }
+
+    .team-social {
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        opacity: 0;
+        transition: all 0.4s ease;
+        gap: 10px;
+    }
+
+    .team-card:hover .team-social {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .social-icon {
+        width: 40px;
+        height: 40px;
+        background-color: rgba(0, 123, 255, 0.9);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.3s, transform 0.3s;
+        font-size: 18px;
+        text-decoration: none;
+    }
+
+        .social-icon:hover {
+            background-color: #0d6efd;
+            transform: scale(1.1);
+        }
+</style>
