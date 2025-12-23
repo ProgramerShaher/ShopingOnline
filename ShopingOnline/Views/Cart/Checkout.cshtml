@@ -130,13 +130,13 @@
                     @foreach (var item in Model.CartItems)
                     {
                         <div class="order-item">
-                            <img src="~/images/@item.Product.Image" alt="@item.Product.Name" class="product-image">
+                            <img src="~/images/Products/@item.Product.Image" alt="@item.Product.Name" class="product-image">
                             <div class="product-details">
                                 <h4>@item.Product.Name</h4>
                                 <p>الكمية: @item.Quantity</p>
                             </div>
                             <div class="product-price">
-                                @(item.Product.Price * item.Quantity) ر.س
+                                @(item.Product.Price * item.Quantity) ريال
                             </div>
                         </div>
                     }
@@ -145,7 +145,7 @@
                 <div class="order-totals">
                     <div class="total-row">
                         <span>المجموع الفرعي:</span>
-                        <span>@Model.SubTotal ر.س</span>
+                        <span>@Model.SubTotal ريال </span>
                     </div>
                     <div class="total-row">
                         <span>تكلفة الشحن:</span>

@@ -13,16 +13,18 @@ using Microsoft.EntityFrameworkCore;
 using PayPalCheckoutSdk.Orders;
 using ShopingOnline.Services; // للكلاس PayPalClient
 using System.Text.Json;
+using Microsoft.Identity.Client;
+using Order = ShopingOnline.Models.Order;
 public class CartController : Controller
 {
     private readonly DbShopingOnlineContext _db;
     private readonly IConverter _converter;
 
-    public CartController(DbShopingOnlineContext db )
+    public CartController(DbShopingOnlineContext db)
     {
 
         _db = db;
-        
+
     }
 
     public IActionResult Index()
@@ -46,7 +48,7 @@ public class CartController : Controller
 
         //var username = HttpContext.Session.GetString("UserName");
         //var userId = HttpContext.Session.GetString("UserId");
-         
+
         //var cartItems = _db.CartItems
         //    .Where(ci => ci.UserId == userId && ci.User.UserName == username)
         //    .Include(ci => ci.Product)
@@ -67,7 +69,7 @@ public class CartController : Controller
             productid.Quantity = quantity < 1 ? 1 : quantity;
         _db.SaveChanges();
         return RedirectToAction("Index");
-        
+
         //var cartItem = _db.CartItems.FirstOrDefault(ci => ci.Id == cartItemId);
 
         //if (cartItem == null)
@@ -84,18 +86,18 @@ public class CartController : Controller
         var deleteproduct = _db.CartItems.FirstOrDefault(x => x.Id == id);
         try
         {
-            
+
             if (deleteproduct == null)
 
                 return NotFound();
 
             _db.CartItems.Remove(deleteproduct);
-           
+
 
         }
         catch
         {
-            
+
         }
         return RedirectToAction("Index");
 
@@ -133,7 +135,7 @@ public class CartController : Controller
 
         return RedirectToAction("Index");
 
-            
+
 
 
 
@@ -160,132 +162,252 @@ public class CartController : Controller
 
     public IActionResult Checkout()
     {
+
+
         var username = HttpContext.Session.GetString("UserName");
-        var userId = HttpContext.Session.GetString("UserId");
-        var user = _db.Users.FirstOrDefault(u => u.Id == userId);
-        var cartItems = _db.CartItems
-            .Where(c => c.UserId == userId && c.User.UserName==username).Include(c => c.Product).ToList();
+        var userid = HttpContext.Session.GetString("UserId");
 
-        var subTotal = cartItems.Sum(item => item.Product.Price * item.Quantity);
-        var viewModel = new CheckoutViewModel
+        var caritems = _db.CartItems.Where(ci => ci.User.UserName == username
+        && ci.UserId == userid).Include(ci => ci.Product).ToList();
+        var SubTotal = caritems.Sum(x => x.Product.Price * x.Quantity);
+
+        var user = _db.Users.FirstOrDefault(user => user.Id == userid);
+        if (user == null)
         {
-            FullName = user.FullName,
-            PhoneNumber = user.PhoneNumber,
-            Email = user.Email,
-            CartItems = cartItems,
-            SubTotal = subTotal
-        };
+            return NotFound();
+        }
+        else
+        {
+            var ViewModel = new CheckoutViewModel
+            {
+                FullName = user.FullName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                CartItems = caritems,
+                SubTotal = SubTotal,
+                Shipping = 100
+            };
+            return View(ViewModel);
+        }
 
-        return View(viewModel);
     }
+
+
+
+
     [HttpGet]
     public IActionResult ConfirmOrder()
     {
         // جهّز نموذج فارغ مثلاً
-       
+
         return View();
     }
-
-
     [HttpPost]
     [ActionName("ConfirmOrder")]
-    public async Task<IActionResult> ConfirmOrderPost()
+    public IActionResult ConfirmOrderPost()
     {
+
         var username = HttpContext.Session.GetString("UserName");
         var userId = HttpContext.Session.GetString("UserId");
 
-        var cartItems = _db.CartItems
-            .Where(c => c.UserId == userId && c.User.UserName == username)
-            .Include(c => c.Product)
-            .ToList();
+        var cartitems = _db.CartItems.Where(ci => ci.UserId == userId && ci.User.UserName == username)
+            .Include(ci => ci.Product).ToList();
 
-        if (!cartItems.Any())
-            return RedirectToAction("Index", "Cart");
-
-        var totalAmount = cartItems.Sum(c => c.Product.Price * c.Quantity);
-
-        var orderRequest = new OrderRequest()
+        var totalamount = cartitems.Sum(x => x.Quantity * x.Product.Price);
+        if (!cartitems.Any())
         {
-            CheckoutPaymentIntent = "CAPTURE",
-            PurchaseUnits = new List<PurchaseUnitRequest>
+            return RedirectToAction("Categories", "Home");
+        }
+
+        var order = new Order
         {
-            new PurchaseUnitRequest
+            UserId = userId,
+            OrderDate = DateTime.Now,
+            OrderStatusNew = OrderStatus.جديد,
+            TotalAmount = totalamount,
+            OrderDetails = cartitems.Select(c => new OrderDetail
             {
-                AmountWithBreakdown = new AmountWithBreakdown
-                {
-                    CurrencyCode = "USD", // يمكنك تغييره إلى عملتك إذا مدعومة
-                    Value = totalAmount.ToString("F2")
-                }
-            }
-        },
-            ApplicationContext = new ApplicationContext
-            {
-                ReturnUrl = Url.Action("PayPalSuccess", "Cart", null, Request.Scheme),
-                CancelUrl = Url.Action("Checkout", "Cart", null, Request.Scheme)
-            }
+                ProductId = c.ProductId,
+                Quantity = c.Quantity,
+                Price = c.Product.Price
+            }).ToList()
+            
         };
+        
 
-        var request = new OrdersCreateRequest();
-        request.Prefer("return=representation");
-        request.RequestBody(orderRequest);
+        _db.Orders.Add(order);
+        _db.CartItems.RemoveRange(cartitems);
+       
+        _db.SaveChanges();
 
-        var response = await PayPalClient.Client().Execute(request);
-        var statusCode = response.StatusCode;
-        var result = response.Result<PayPalCheckoutSdk.Orders.Order>();
+        var lastInvoice = _db.Invoices.OrderByDescending(i => i.Id).FirstOrDefault();
+        int lastNumber = 0;
 
-        // حفظ رقم الطلب في Session مؤقتًا لاستخدامه لاحقًا
-        HttpContext.Session.SetString("PayPalOrderId", result.Id);
-        HttpContext.Session.SetString("TotalAmount", totalAmount.ToString());
+        if (lastInvoice != null && !string.IsNullOrEmpty(lastInvoice.InvoiceNumber))
+        {
+            var parts = lastInvoice.InvoiceNumber.Split('-');
+            int.TryParse(parts.Last(), out lastNumber);
+        }
 
-        // توجيه المستخدم إلى PayPal
-        var approvalLink = result.Links.FirstOrDefault(link => link.Rel == "approve")?.Href;
-        return Redirect(approvalLink);
+        int newNumber = lastNumber + 1;
+        string invoiceNumber = $"INV-{DateTime.Now.Year}-{newNumber:D3}";
+
+        Invoice invoice = new();
+        invoice.OrderId =order.Id;
+        invoice.InvoiceDate = DateTime.Now;
+        invoice.InvoiceNumber = invoiceNumber;
+        invoice.PdfPath = "shaher/invoice";
+
+        _db.Invoices.Add(invoice);
+        _db.SaveChanges();
+
+        return RedirectToAction("OrderSuccess", new { orderId = order.Id });
+
     }
+    //public IActionResult invoicee(int orderid)
+    //{
+    //    // جهّز نموذج فارغ مثلاً
+
+    //    return View();
+    //}
+    public IActionResult Invoice(int orderId)
+    {
+        var invoice = _db.Invoices
+            .Include(i => i.Order)
+                .ThenInclude(o => o.User)
+            .Include(i => i.Order.OrderDetails)
+                .ThenInclude(od => od.Product)
+            .FirstOrDefault(i => i.OrderId == orderId);
+
+        if (invoice == null)
+        {
+            return NotFound("⚠️ الفاتورة غير موجودة لهذا الطلب.");
+        }
+
+        return View(invoice);
+    }
+
+
+    //[HttpPost]
+    //public IActionResult Invoice()
+    //{
+    //    var invoice = _db.Invoices
+    //        .Include(i => i.Order)
+    //            .ThenInclude(o => o.User)
+    //        .Include(i => i.Order)
+    //            .ThenInclude(o => o.OrderDetails)
+    //                .ThenInclude(od => od.Product)
+    //        .FirstOrDefault(i => i.Id == 24);
+
+    //    if (invoice == null)
+    //    {
+    //        return NotFound();
+    //    }
+
+    //    return View(invoice);
+    //}
+
+
+    //[HttpPost]
+    //[ActionName("ConfirmOrder")]
+    //public async Task<IActionResult> ConfirmOrderPost()
+    //{
+    //    var username = HttpContext.Session.GetString("UserName");
+    //var userId = HttpContext.Session.GetString("UserId");
+
+    //var cartItems = _db.CartItems
+    //    .Where(c => c.UserId == userId && c.User.UserName == username)
+    //    .Include(c => c.Product)
+    //    .ToList();
+
+    //    if (!cartItems.Any())
+    //        return RedirectToAction("Index", "Cart");
+
+    //var totalAmount = cartItems.Sum(c => c.Product.Price * c.Quantity);
+
+    //    var orderRequest = new OrderRequest()
+    //    {
+    //        CheckoutPaymentIntent = "CAPTURE",
+    //        PurchaseUnits = new List<PurchaseUnitRequest>
+    //    {
+    //        new PurchaseUnitRequest
+    //        {
+    //            AmountWithBreakdown = new AmountWithBreakdown
+    //            {
+    //                CurrencyCode = "USD", // يمكنك تغييره إلى عملتك إذا مدعومة
+    //                Value = totalAmount.ToString("F2")
+    //            }
+    //        }
+    //    },
+    //        ApplicationContext = new ApplicationContext
+    //        {
+    //            ReturnUrl = Url.Action("PayPalSuccess", "Cart", null, Request.Scheme),
+    //            CancelUrl = Url.Action("Checkout", "Cart", null, Request.Scheme)
+    //        }
+    //    };
+
+    //    var request = new OrdersCreateRequest();
+    //    request.Prefer("return=representation");
+    //    request.RequestBody(orderRequest);
+
+    //    var response = await PayPalClient.Client().Execute(request);
+    //    var statusCode = response.StatusCode;
+    //    var result = response.Result<PayPalCheckoutSdk.Orders.Order>();
+
+    //    // حفظ رقم الطلب في Session مؤقتًا لاستخدامه لاحقًا
+    //    HttpContext.Session.SetString("PayPalOrderId", result.Id);
+    //    HttpContext.Session.SetString("TotalAmount", totalAmount.ToString());
+
+    //    // توجيه المستخدم إلى PayPal
+    //    var approvalLink = result.Links.FirstOrDefault(link => link.Rel == "approve")?.Href;
+    //    return Redirect(approvalLink);
+    //}
 
     // عرض صفحة نجاح الطلب
 
-    public async Task<IActionResult> PayPalSuccess(string token)
-    {
-        var userId = HttpContext.Session.GetString("UserId");
-        var username = HttpContext.Session.GetString("UserName");
+    //public async Task<IActionResult> PayPalSuccess(string token)
+    //{
+    //    var userId = HttpContext.Session.GetString("UserId");
+    //    var username = HttpContext.Session.GetString("UserName");
 
-        var captureRequest = new OrdersCaptureRequest(token);
-        captureRequest.RequestBody(new OrderActionRequest());
+    //    var captureRequest = new OrdersCaptureRequest(token);
+    //    captureRequest.RequestBody(new OrderActionRequest());
 
-        var response = await PayPalClient.Client().Execute(captureRequest);
-        var result = response.Result<PayPalCheckoutSdk.Orders.Order>();
+    //    var response = await PayPalClient.Client().Execute(captureRequest);
+    //    var result = response.Result<PayPalCheckoutSdk.Orders.Order>();
 
-        if (result.Status == "COMPLETED")
-        {
-            // ✅ يتم إنشاء الفاتورة فقط إذا تمت عملية الدفع بنجاح
-            var cartItems = _db.CartItems
-                .Where(c => c.UserId == userId && c.User.UserName == username)
-                .Include(c => c.Product)
-                .ToList();
+    //    if (result.Status == "COMPLETED")
+    //    {
+    //        // ✅ يتم إنشاء الفاتورة فقط إذا تمت عملية الدفع بنجاح
+    //        var cartItems = _db.CartItems
+    //            .Where(c => c.UserId == userId && c.User.UserName == username)
+    //            .Include(c => c.Product)
+    //            .ToList();
 
-            var order = new ShopingOnline.Models.Order
-            {
-                UserId = userId,
-                OrderDate = DateTime.Now,
-                TotalAmount = decimal.Parse(HttpContext.Session.GetString("TotalAmount")),
-                OrderStatusNew = OrderStatus.جديد,
-                OrderDetails = cartItems.Select(c => new OrderDetail
-                {
-                    ProductId = c.ProductId,
-                    Quantity = c.Quantity,
-                    Price = c.Product.Price
-                }).ToList()
-            };
+    //    var order = new ShopingOnline.Models.Order
+    //    {
+    //        UserId = userId,
+    //        OrderDate = DateTime.Now,
+    //        TotalAmount = decimal.Parse(HttpContext.Session.GetString("TotalAmount")),
+    //        OrderStatusNew = OrderStatus.جديد,
+    //        OrderDetails = cartItems.Select(c => new OrderDetail
+    //        {
+    //            ProductId = c.ProductId,
+    //            Quantity = c.Quantity,
+    //            Price = c.Product.Price
+    //        }).ToList()
+    //    };
 
-            _db.Orders.Add(order);
-            _db.CartItems.RemoveRange(cartItems);
-            await _db.SaveChangesAsync();
+    //    _db.Orders.Add(order);
+    //            _db.CartItems.RemoveRange(cartItems);
+    //            await _db.SaveChangesAsync();
 
-            return RedirectToAction("OrderSuccess", new { orderId = order.Id });
-        }
+    //            return RedirectToAction("OrderSuccess", new { orderId = order.Id
+    //});
+    //        }
 
-        return RedirectToAction("Checkout", "Cart");
-    }
+    //    return RedirectToAction("Checkout", "Cart");
+    //}
 
     public IActionResult OrderSuccess(int orderId)
     {
@@ -300,20 +422,6 @@ public class CartController : Controller
         }
 
         return View(order);  // عرض الـView مع تفاصيل الطلب
-    }
-    public IActionResult Invoice(int orderId)
-    {
-        var order = _db.Orders
-            .Include(o => o.User)
-            .Include(o => o.OrderDetails)
-            .ThenInclude(od => od.Product)
-            .FirstOrDefault(o => o.Id == orderId);
-
-        if (order == null)
-            return NotFound();
-
-        return View(order);
-
     }
 
 

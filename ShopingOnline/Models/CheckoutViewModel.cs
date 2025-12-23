@@ -16,7 +16,7 @@ namespace ShopingOnline.ViewModels
 
         // للحساب
         public decimal SubTotal { get; set; }
-        public decimal Shipping { get; set; } = 25; // مثال شحن ثابت
+        public decimal Shipping { get; set; } // مثال شحن ثابت
         public decimal Total => SubTotal + Shipping;
     }
 }

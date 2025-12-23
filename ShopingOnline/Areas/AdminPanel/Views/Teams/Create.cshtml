@@ -1,4 +1,4 @@
-﻿@model ShopingOnline.Models.Team
+﻿@model ShopingOnline.Dto.TeamDto
 
 @{
     ViewData["Title"] = "Create";
@@ -23,20 +23,32 @@
                 <span asp-validation-for="Jobs" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="PhonNumber" class="control-label"></label>
+                <input asp-for="PhonNumber" class="form-control" />
+                <span asp-validation-for="PhonNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="Email" class="control-label"></label>
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Password" class="control-label" placeholder="Password" autocomplete="new-password" aria-required="true"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+          
+            <div class="form-group">
                 <label asp-for="File" class="control-label"></label>
                 <input asp-for="File" class="form-control" />
                 <span asp-validation-for="File" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Date" class="control-label"></label>
-                <input asp-for="Date" class="form-control" />
-                <span asp-validation-for="Date" class="text-danger"></span>
-            </div>
+            @* <div class="form-group"> *@
+            @*     <label asp-for="Date" class="control-label"></label> *@
+            @*     <input asp-for="Date" class="form-control" /> *@
+            @*     <span asp-validation-for="Date" class="text-danger"></span> *@
+            @* </div> *@
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>

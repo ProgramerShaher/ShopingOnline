@@ -1,25 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Encodings.Web;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using ShopingOnline.Areas.Identity.Pages.Account;
 using ShopingOnline.Data;
+using ShopingOnline.Dto;
 using ShopingOnline.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ShopingOnline.Areas.AdminPanel.Controllers
 {
     [Area("AdminPanel")]
 
+    [Authorize(Roles = "Admin")] // User must be in Admin OR Manager role
+
     public class TeamsController : Controller
     {
         private readonly DbShopingOnlineContext _db;
         private readonly IWebHostEnvironment _host;
-        public TeamsController(DbShopingOnlineContext db, IWebHostEnvironment host)
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IEmailSender _emailSender;
+        public TeamsController(DbShopingOnlineContext db,
+            IWebHostEnvironment host, UserManager<User> userManager,
+             RoleManager<IdentityRole> roleManager,
+             IEmailSender emailSender)
         {
             _db = db;
             _host = host;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _emailSender = emailSender;
         }
 
         // GET: Teams
@@ -63,13 +82,49 @@ namespace ShopingOnline.Areas.AdminPanel.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Team team)
+        public async Task<IActionResult> Create(TeamDto team)
         {
             uploadphoto(team);
             if (team.Image != null)
             {
-                _db.Add(team);
+                Team T = new Team();
+                T.Email = team.Email;
+                T.Date = team.Date;
+                T.Image = team.Image;
+                T.Jobs = team.Jobs;
+                T.Name = team.Name;
+               
+                _db.Add(T);
+                User u = new User();
+                u.FullName = team.Name;
+               // u.PasswordHash = password;
+                u.Email = team.Email;
+                u.Role = "Admin";
+                u.UserName = team.Email;
+                u.PhoneNumber = team.PhonNumber;
+                u.Create = DateTime.Now;
+
+                var result = await _userManager.CreateAsync(u, team.Password);
+                if (result.Succeeded)
+                {
+                    if (!await _roleManager.RoleExistsAsync("Admin"))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                    }
+                    await _userManager.AddToRoleAsync(u, "Admin");
+                   // await _userManager.AddToRoleAsync(user, Input.Role);
+
+                    var userId = await _userManager.GetUserIdAsync(u);
+                    var user = await _userManager.FindByIdAsync(userId);
+                    if (user != null)
+                    {
+                        user.EmailConfirmed = true;
+                        await _userManager.UpdateAsync(user);
+                    }
+                }
+                //u.PhoneNumber=team.ph
                 await _db.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
             return View(team);
@@ -164,7 +219,7 @@ namespace ShopingOnline.Areas.AdminPanel.Controllers
             return _db.Teammembers.Any(e => e.Id == id);
         }
 
-        void uploadphoto(Team model)
+        void uploadphoto(TeamDto model)
         {
             if (model.File != null)
             {

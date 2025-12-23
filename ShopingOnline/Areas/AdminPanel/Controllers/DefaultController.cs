@@ -157,7 +157,7 @@ namespace ShopingOnline.Areas.AdminPanel.Controllers
                     Price = od.Product.Price
                 }).ToList()
             };
-
+            
             return View(viewModel);
         }
 

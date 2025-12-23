@@ -17,8 +17,6 @@ namespace ShopingOnline
             // Add services to the container.
             builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
-
-
             var connectionString = builder.Configuration.GetConnectionString("ConnectionShopingOnline")
                 ?? throw new InvalidOperationException("Connection string 'ConnectionShopingOnline' not found.");
 
@@ -30,36 +28,53 @@ namespace ShopingOnline
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = true;
+
+                // إعدادات إضافية للتأكد من عدم وجود مشاكل
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 6;
+
+                options.User.RequireUniqueEmail = true;
             })
             .AddEntityFrameworkStores<DbShopingOnlineContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddDefaultUI(); // ← إضافة مهمة لصفحات الهوية
 
-            // إعداد مسار الـ Login في Area معينة
+            // إعداد مسار الـ Login
             builder.Services.ConfigureApplicationCookie(options =>
             {
-                // تحديد المسار الخاص بـ Login في الـ Area المحددة
-                options.LoginPath = "/Identity/Account/Login"; // تأكد من أن هذا المسار يتوافق مع الـ Area التي لديك
-                options.AccessDeniedPath = "/Identity/Account/AccessDenied"; // إذا كنت تحتاج صفحة لرفض الوصول
+                options.LoginPath = "/Identity/Account/Login";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                options.LogoutPath = "/Identity/Account/Logout";
+                options.SlidingExpiration = true;
             });
 
             // صفحة الأخطاء للمطور
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+            // إضافة logging للمساعدة في التشخيص
+            builder.Logging.AddConsole();
+            builder.Logging.AddDebug();
+            builder.Logging.SetMinimumLevel(LogLevel.Debug);
+
             // MVC + Razor Pages
             builder.Services.AddControllersWithViews();
-            builder.Services.AddRazorPages(); // ← مطلوب لـ MapRazorPages
+            builder.Services.AddRazorPages();
 
             // Session
-            builder.Services.AddDistributedMemoryCache(); // مطلوب لتخزين بيانات الجلسة في الذاكرة
+            builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
+
             builder.Services.AddHttpContextAccessor();
-
-
             builder.Services.AddTransient<IEmailSender, ShopingOnline.Services.FakeEmailSender>();
 
             var app = builder.Build();
@@ -67,6 +82,7 @@ namespace ShopingOnline
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
             }
             else
@@ -79,27 +95,44 @@ namespace ShopingOnline
             app.UseStaticFiles();
 
             app.UseRouting();
-            app.UseSession();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
+            app.UseSession();
+
+            // استخدام التوجيه الحديث بدلاً من UseEndpoints
+            app.MapControllerRoute(
+                name: "areaRoute",
+                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.MapRazorPages();
+
+            // تهيئة قاعدة البيانات والأدوار الأولى
+            using (var scope = app.Services.CreateScope())
             {
-                // دعم الـ Areas
-                endpoints.MapControllerRoute(
-                    name: "AdminPanel",
-                    pattern: "{area:exists}/{controller=Default}/{action=Index}/{id?}"
-                );
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<DbShopingOnlineContext>();
+                    var userManager = services.GetRequiredService<UserManager<User>>();
+                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-                // المسار الافتراضي
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}"
-                );
+                    // تأكد من تطبيق migrations تلقائياً
+                    context.Database.Migrate();
 
-                // دعم صفحات Razor الخاصة بالهوية
-                endpoints.MapRazorPages();
-            });
+                    // يمكنك إضافة تهيئة البيانات هنا إذا needed
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while seeding the database.");
+                }
+            }
 
             app.Run();
         }
